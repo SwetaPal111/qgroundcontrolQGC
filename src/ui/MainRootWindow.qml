@@ -38,7 +38,7 @@ ApplicationWindow {
             height  = ScreenTools.isMobile ? Screen.height : Math.min(150 * Screen.pixelDensity, Screen.height)
         }
 
-        loggedIn = false//mainWindow.loadLoginState()
+        loggedIn = mainWindow.loadLoginState()
         loginScreen.visible = !loggedIn
 
         // Start the sequence of first run prompt(s)
