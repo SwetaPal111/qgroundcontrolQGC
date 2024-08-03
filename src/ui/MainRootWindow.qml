@@ -19,6 +19,7 @@ import QGroundControl.Controls      1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.FlightMap     1.0
+import Qt.labs.settings 1.0
 
 /// @brief Native QML top level window
 /// All properties defined here are visible to all QML pages.
@@ -37,8 +38,19 @@ ApplicationWindow {
             height  = ScreenTools.isMobile ? Screen.height : Math.min(150 * Screen.pixelDensity, Screen.height)
         }
 
-        // Start the sequence of first run prompt(s)
-        firstRunPromptManager.nextPrompt()
+        // loggedIn = mainWindow.loadLoginState()
+        // loginScreen.visible = !loggedIn
+
+        // // Start the sequence of first run prompt(s)
+        // if(loggedIn){
+        // firstRunPromptManager.nextPrompt()
+        // }
+        loggedIn = mainWindow.loadLoginState()
+        if (!loggedIn) {
+            loginScreen.show()
+        } else {
+            firstRunPromptManager.nextPrompt()
+        }
     }
 
     QtObject {
@@ -424,6 +436,48 @@ ApplicationWindow {
             }
         }
     }
+    // This is the Login component which will be displayed when the user is not logged in
+    Login{
+        id: loginScreen
+        visible: !loggedIn // The login screen is visible when the user is not logged in
+
+        // Function triggered when login is requested
+        onLoginRequested: (username, password) => {
+
+                              // If the authentication is successful
+                              if (mainWindow.authenticate(username, password)) {
+                                  mainWindow.loggedIn = true // Set the loggedIn property to true
+                                  mainWindow.saveLoginState() // Save the login state
+                                  loginScreen.hide() // Hide the login screen
+                                  firstRunPromptManager.nextPrompt()
+                              } else {
+                                  loginScreen.invldStrng = "Invalid credentials"  // Set an error message for invalid credentials
+                              }
+                          }
+    }
+    property bool loggedIn: false
+
+    // MainWindow object with functions for authentication and saving/loading login state
+        function authenticate(username, password) {
+                // Hardcoded credentials
+                const validUsername = "user"
+                const validPassword = "password"
+                return username === validUsername && password === validPassword  // Check if the provided credentials match the hardcoded ones
+            }
+
+            function saveLoginState() {
+
+                // Create a Settings object to save the login state
+                const settings = Qt.createQmlObject('import Qt.labs.settings 1.0; Settings {}', mainWindow)
+                settings.setValue('loggedIn', loggedIn) // Save the loggedIn property value
+            }
+
+            function loadLoginState() {
+
+                // Create a Settings object to load the login state
+                const settings = Qt.createQmlObject('import Qt.labs.settings 1.0; Settings {}', mainWindow)
+                return settings.value('loggedIn', false) // Return the saved login state or false if not found
+            }
 
 
     FlyView {
