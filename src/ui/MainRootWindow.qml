@@ -38,11 +38,19 @@ ApplicationWindow {
             height  = ScreenTools.isMobile ? Screen.height : Math.min(150 * Screen.pixelDensity, Screen.height)
         }
 
-        loggedIn = mainWindow.loadLoginState()
-        loginScreen.visible = !loggedIn
+        // loggedIn = mainWindow.loadLoginState()
+        // loginScreen.visible = !loggedIn
 
-        // Start the sequence of first run prompt(s)
-        firstRunPromptManager.nextPrompt()
+        // // Start the sequence of first run prompt(s)
+        // if(loggedIn){
+        // firstRunPromptManager.nextPrompt()
+        // }
+        loggedIn = mainWindow.loadLoginState()
+        if (!loggedIn) {
+            loginScreen.show()
+        } else {
+            firstRunPromptManager.nextPrompt()
+        }
     }
 
     QtObject {
@@ -441,6 +449,7 @@ ApplicationWindow {
                                   mainWindow.loggedIn = true // Set the loggedIn property to true
                                   mainWindow.saveLoginState() // Save the login state
                                   loginScreen.hide() // Hide the login screen
+                                  firstRunPromptManager.nextPrompt()
                               } else {
                                   loginScreen.invldStrng = "Invalid credentials"  // Set an error message for invalid credentials
                               }
