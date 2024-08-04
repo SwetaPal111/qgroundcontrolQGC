@@ -121,11 +121,36 @@ Column {
         columns:        2
         visible:        cameraCalc.isManualCamera
 
-        QGCLabel { text: distanceToSurfaceLabel }
+        QGCLabel { text: distanceToSurfaceLabel}
         AltitudeFactTextField {
             fact:                       cameraCalc.distanceToSurface
             altitudeMode:               cameraCalc.distanceMode
             Layout.fillWidth:           true
+            onUpdated: {
+                angleSlider.value = cameraCalc.distanceToSurface.value
+                cameraCalc.adjustedFootprintSide.value = cameraCalc.distanceToSurface.value / 2
+            }
+        }
+
+        QGCSlider {
+            id:                     angleSlider
+            minimumValue:           0.10
+            // default                 50.00
+            maximumValue:           359
+            stepSize:               1
+            tickmarksEnabled:       false
+            Layout.fillWidth:       true
+            Layout.columnSpan:      2
+            Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+            onValueChanged: {
+                cameraCalc.distanceToSurface.value = value
+                cameraCalc.adjustedFootprintSide.value = cameraCalc.distanceToSurface.value / 2
+            }
+            Component.onCompleted: {
+                value = cameraCalc.distanceToSurface.value
+                cameraCalc.adjustedFootprintSide.value = cameraCalc.distanceToSurface.value / 2
+            }
+            updateValueWhileDragging: true
         }
 
         QGCLabel { text: frontalDistanceLabel }
@@ -136,7 +161,9 @@ Column {
 
         QGCLabel { text: sideDistanceLabel }
         FactTextField {
+            id:spacingText
             Layout.fillWidth:   true
+            readOnly: true
             fact:               cameraCalc.adjustedFootprintSide
         }
     } // GridLayout
